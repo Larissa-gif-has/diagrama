@@ -1,92 +1,76 @@
-Table cliente_pj_pf {
-  idcliente INT [pk]
-  nome VARCHAR(45)
-  identificacao VARCHAR(45)
-  endereco VARCHAR(45)
-  tipo_cliente VARCHAR(2) // 'PJ' ou 'PF'
-  cpf VARCHAR(11)
-  cnpj VARCHAR(14)
-  nome_fantasia VARCHAR(45)
-}
+CREATE TABLE `Clientes` (
+  `id_cliente` INT PRIMARY KEY AUTO_INCREMENT,
+  `nome` VARCHAR(100),
+  `endereco` VARCHAR(255),
+  `telefone` VARCHAR(15)
+);
 
-Table pagamento {
-  idpagamento INT [pk]
-  idpedido INT
-  tipo_pagamento VARCHAR(45)
-  valor FLOAT
-  data_pagamento DATE
-}
+CREATE TABLE `Veiculos` (
+  `id_veiculo` INT PRIMARY KEY AUTO_INCREMENT,
+  `modelo` VARCHAR(100),
+  `placa` VARCHAR(10),
+  `ano` INT,
+  `id_cliente` INT
+);
 
-Table entrega {
-  identrega INT [pk]
-  idpedido INT
-  status_entrega VARCHAR(45)
-  codigo_rastreio VARCHAR(45)
-}
+CREATE TABLE `Mecanicos` (
+  `id_mecanico` INT PRIMARY KEY AUTO_INCREMENT,
+  `nome` VARCHAR(100),
+  `endereco` VARCHAR(255),
+  `especialidade` VARCHAR(50)
+);
 
-Table fornecedor {
-  idfornecedor INT [pk]
-  razao_social VARCHAR(45)
-  cnpj VARCHAR(14)
-}
+CREATE TABLE `OrdensServico` (
+  `id_os` INT PRIMARY KEY AUTO_INCREMENT,
+  `numero_os` VARCHAR(20),
+  `data_emissao` DATE,
+  `valor_total` DECIMAL(10,2),
+  `status` VARCHAR(20),
+  `data_conclusao` DATE,
+  `id_veiculo` INT
+);
 
-Table terceiro_vendedor {
-  idterceiro_vendedor INT [pk]
-  razao_social VARCHAR(45)
-  local VARCHAR(45)
-}
+CREATE TABLE `Servicos` (
+  `id_servico` INT PRIMARY KEY AUTO_INCREMENT,
+  `descricao` VARCHAR(255),
+  `preco_mao_obra` DECIMAL(10,2)
+);
 
-Table produto {
-  idproduto INT [pk]
-  categoria VARCHAR(45)
-  descricao VARCHAR(45)
-  valor FLOAT
-}
+CREATE TABLE `Pecas` (
+  `id_peca` INT PRIMARY KEY AUTO_INCREMENT,
+  `nome` VARCHAR(100),
+  `preco` DECIMAL(10,2)
+);
 
-Table estoque {
-  idestoque INT [pk]
-  local VARCHAR(45)
-}
+CREATE TABLE `OrdensServico_Servicos` (
+  `id_os` INT,
+  `id_servico` INT,
+  `quantidade` INT
+);
 
-Table produto_has_estoque {
-  produto_idproduto INT
-  estoque_idestoque INT
-  quantidade INT
-}
+CREATE TABLE `OrdensServico_Pecas` (
+  `id_os` INT,
+  `id_peca` INT,
+  `quantidade` INT
+);
 
-Table produtos_por_vendedor {
-  produto_idproduto INT
-  terceiro_vendedor_idterceiro INT
-  quantidade INT
-}
+CREATE TABLE `EquipeMecanicos` (
+  `id_os` INT,
+  `id_mecanico` INT
+);
 
-Table disponibilizando_um_produto {
-  fornecedor_idfornecedor INT
-  produto_idproduto INT
-}
+ALTER TABLE `Veiculos` ADD FOREIGN KEY (`id_cliente`) REFERENCES `Clientes` (`id_cliente`);
 
-Table pedido {
-  idpedido INT [pk]
-  status_do_pedido VARCHAR(45)
-  descricao VARCHAR(45)
-  cliente_idcliente INT
-  frete FLOAT
-}
+ALTER TABLE `OrdensServico` ADD FOREIGN KEY (`id_veiculo`) REFERENCES `Veiculos` (`id_veiculo`);
 
-Table relacao_produto_pedido {
-  produto_idproduto INT
-  pedido_idpedido INT
-}
+ALTER TABLE `OrdensServico_Servicos` ADD FOREIGN KEY (`id_os`) REFERENCES `OrdensServico` (`id_os`);
 
-// Referências entre tabelas
-Ref: produto_has_estoque.produto_idproduto > produto.idproduto
-Ref: produto_has_estoque.estoque_idestoque > estoque.idestoque
-Ref: produtos_por_vendedor.produto_idproduto > produto.idproduto
-Ref: produtos_por_vendedor.terceiro_vendedor_idterceiro > terceiro_vendedor.idterceiro_vendedor
-Ref: disponibilizando_um_produto.fornecedor_idfornecedor > fornecedor.idfornecedor
-Ref: disponibilizando_um_produto.produto_idproduto > produto.idproduto
-Ref: pedido.cliente_idcliente > cliente_pj_pf.idcliente
-Ref: relacao_produto_pedido.produto_idproduto > produto.idproduto
-Ref: relacao_produto_pedido.pedido_idpedido > pedido.idpedido
-Ref: pagamento.idpedido > pedido.idpedido
-Ref: entrega.idpedido > pedido.idpedido
+ALTER TABLE `OrdensServico_Servicos` ADD FOREIGN KEY (`id_servico`) REFERENCES `Servicos` (`id_servico`);
+
+ALTER TABLE `OrdensServico_Pecas` ADD FOREIGN KEY (`id_os`) REFERENCES `OrdensServico` (`id_os`);
+
+ALTER TABLE `OrdensServico_Pecas` ADD FOREIGN KEY (`id_peca`) REFERENCES `Pecas` (`id_peca`);
+
+ALTER TABLE `EquipeMecanicos` ADD FOREIGN KEY (`id_os`) REFERENCES `OrdensServico` (`id_os`);
+
+ALTER TABLE `EquipeMecanicos` ADD FOREIGN KEY (`id_mecanico`) REFERENCES `Mecanicos` (`id_mecanico`);
